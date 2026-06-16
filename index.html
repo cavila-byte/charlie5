@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accounting Associate Assessment — Boldr Impact</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#FAFAF8;--surface:#fff;--border:#E8E6E0;--border-mid:#D0CEC8;
+    --text:#1A1916;--muted:#6B6860;--hint:#9B9890;
+    --accent:#1A4D8F;--accent-light:#EBF1FA;--accent-mid:#B5D0F0;
+    --teal:#0F6E56;--teal-light:#E1F5EE;--teal-border:#9FE1CB;
+    --coral:#993C1D;--coral-light:#FAECE7;--coral-border:#F5C4B3;
+    --amber:#854F0B;--amber-light:#FAEEDA;
+    --purple:#3C3489;--purple-light:#EEEDFE;
+    --r-sm:6px;--r-md:10px;--r-lg:14px;
+    font-family:'DM Sans',system-ui,sans-serif;
+  }
+  body{background:var(--bg);color:var(--text);min-height:100vh;padding:2rem 1rem 4rem}
+  .page{max-width:720px;margin:0 auto}
+  .letterhead{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:2.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}
+  .org{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+  .doc-title{font-size:24px;font-weight:600;color:var(--text);margin-top:6px;line-height:1.2}
+  .doc-meta{font-size:13px;color:var(--hint);margin-top:4px}
+  .logo{width:40px;height:40px;background:var(--text);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .logo svg{width:22px;height:22px;fill:none;stroke:white;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .instr{background:var(--accent-light);border:1px solid var(--accent-mid);border-radius:var(--r-md);padding:1rem 1.25rem;margin-bottom:2rem;font-size:13.5px;color:var(--accent);line-height:1.6}
+  .instr strong{font-weight:600}
+  .track-picker{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:2rem}
+  .track-card{border:1.5px solid var(--border);border-radius:var(--r-lg);padding:1.25rem;cursor:pointer;transition:all .15s;background:var(--surface)}
+  .track-card:hover{border-color:var(--border-mid);background:var(--bg)}
+  .track-card.active{border-color:var(--accent);background:var(--accent-light)}
+  .track-card.active .tc-title{color:var(--accent)}
+  .tc-icon{font-size:20px;margin-bottom:8px}
+  .tc-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px}
+  .tc-sub{font-size:12px;color:var(--muted);line-height:1.4}
+  .tc-pill{display:inline-block;font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;margin-top:7px}
+  .pill-f{background:var(--teal-light);color:var(--teal)}
+  .pill-e{background:var(--purple-light);color:var(--purple)}
+  .track-note{font-size:13px;color:var(--muted);padding:9px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:1.5rem;display:none}
+  .timer-wrap{position:sticky;top:12px;z-index:10;margin-bottom:1.5rem}
+  .timer-bar{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);box-shadow:0 2px 12px rgba(0,0,0,.06)}
+  .timer-bar.warn{border-color:#EF9F27;background:var(--amber-light)}
+  .timer-bar.danger{border-color:#E24B4A;background:#FEF2F2}
+  .t-icon{font-size:15px;flex-shrink:0;color:var(--muted)}
+  .timer-bar.warn .t-icon,.timer-bar.warn .t-lbl{color:var(--amber)}
+  .timer-bar.danger .t-icon,.timer-bar.danger .t-lbl{color:#A32D2D;font-weight:500}
+  .t-lbl{font-size:13px;color:var(--muted);flex:1}
+  .t-clock{font-family:'DM Mono',monospace;font-size:17px;font-weight:500;color:var(--text);min-width:48px;text-align:right}
+  .timer-bar.warn .t-clock{color:var(--amber)}
+  .timer-bar.danger .t-clock{color:#A32D2D}
+  .t-prog{height:3px;background:var(--border);border-radius:2px;margin-top:8px}
+  .t-fill{height:100%;border-radius:2px;background:var(--accent);transition:width 1s linear}
+  .timer-bar.warn .t-fill{background:#EF9F27}
+  .timer-bar.danger .t-fill{background:#E24B4A}
+  .prog-row{display:flex;align-items:center;gap:10px;margin-bottom:1.5rem}
+  .prog-lbl{font-size:12px;color:var(--hint);white-space:nowrap}
+  .prog-track{flex:1;height:4px;background:var(--border);border-radius:2px}
+  .prog-fill{height:100%;border-radius:2px;background:var(--accent);transition:width .3s;width:0%}
+  .section{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.5rem;margin-bottom:1.25rem}
+  .sec-hdr{display:flex;align-items:center;gap:12px;padding-bottom:1rem;margin-bottom:1.25rem;border-bottom:1px solid var(--border)}
+  .sec-icon{width:34px;height:34px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+  .sec-title{font-size:15px;font-weight:600;color:var(--text)}
+  .sec-pts{font-size:12px;color:var(--hint);margin-top:1px}
+  .q{margin-bottom:1.5rem}
+  .q:last-child{margin-bottom:0}
+  .q-num{font-size:11px;font-weight:600;color:var(--hint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .q-tag{font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:.04em}
+  .q-text{font-size:14px;color:var(--text);margin-bottom:10px;line-height:1.55}
+  .q-hint{font-size:12.5px;color:#2a5fa8;background:var(--accent-light);border-left:2px solid var(--accent);padding:7px 11px;margin-bottom:10px;line-height:1.5;border-radius:0 var(--r-sm) var(--r-sm) 0}
+  .options{display:flex;flex-direction:column;gap:7px}
+  .option{display:flex;align-items:flex-start;gap:9px;padding:9px 12px;border:1px solid var(--border);border-radius:var(--r-sm);cursor:pointer;font-size:13.5px;color:var(--text);line-height:1.45;transition:all .12s;background:var(--surface)}
+  .option:hover{border-color:var(--border-mid);background:var(--bg)}
+  .option.sel-ok{border-color:var(--teal);background:var(--teal-light);color:#085041}
+  .option.sel-no{border-color:var(--coral);background:var(--coral-light);color:#4A1B0C}
+  .option.show-ok{border-color:var(--teal);background:var(--teal-light);color:#085041}
+  .option input[type=radio]{margin-top:2px;flex-shrink:0;accent-color:var(--accent);width:15px;height:15px}
+  .checkboxes{display:flex;flex-direction:column;gap:7px}
+  .chk-opt{display:flex;align-items:flex-start;gap:9px;padding:9px 12px;border:1px solid var(--border);border-radius:var(--r-sm);cursor:pointer;font-size:13.5px;color:var(--text);line-height:1.45;transition:all .12s;background:var(--surface)}
+  .chk-opt:hover{border-color:var(--border-mid);background:var(--bg)}
+  .chk-opt.chk-ok{border-color:var(--teal);background:var(--teal-light);color:#085041}
+  .chk-opt.chk-no{border-color:var(--coral);background:var(--coral-light);color:#4A1B0C}
+  .chk-opt.chk-miss{border-color:#EF9F27;background:var(--amber-light);color:#412402}
+  .chk-opt input[type=checkbox]{margin-top:2px;flex-shrink:0;accent-color:var(--accent);width:15px;height:15px}
+  input[type=text],select{width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:var(--r-sm);font-size:13.5px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--surface);transition:border-color .15s}
+  input[type=text]:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(26,77,143,.08)}
+  .input-sm{min-height:38px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px}
+  .field-lbl{font-size:12px;color:var(--hint);display:block;margin-bottom:4px;font-weight:500}
+  .journal-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+  .journal-table th{font-weight:600;text-align:left;padding:7px 10px;font-size:11px;color:var(--hint);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)}
+  .journal-table td{padding:5px 8px;border-bottom:1px solid var(--border)}
+  .journal-table input{border:none;background:transparent;font-size:13.5px;font-family:'DM Sans',sans-serif;color:var(--text);width:100%;outline:none;padding:2px 3px}
+  .journal-table input:focus{background:var(--bg);border-radius:4px}
+  .feedback{font-size:12.5px;margin-top:8px;padding:7px 11px;border-radius:var(--r-sm);display:none;line-height:1.55}
+  .fb-ok{display:block;background:var(--teal-light);color:#085041;border:1px solid var(--teal-border)}
+  .fb-no{display:block;background:var(--coral-light);color:#4A1B0C;border:1px solid var(--coral-border)}
+  .fb-part{display:block;background:var(--amber-light);color:#412402;border:1px solid #FAC775}
+  .score-inline{font-size:11px;font-weight:600;margin-left:6px;padding:1px 6px;border-radius:4px;vertical-align:middle}
+  .si-ok{background:var(--teal-light);color:var(--teal)}
+  .si-no{background:var(--coral-light);color:var(--coral)}
+  .si-part{background:var(--amber-light);color:var(--amber)}
+  .actions{display:flex;gap:10px;margin-top:2rem;flex-wrap:wrap}
+  .btn{padding:9px 20px;border-radius:var(--r-sm);font-size:14px;font-family:'DM Sans',sans-serif;font-weight:500;cursor:pointer;transition:all .15s}
+  .btn-primary{background:var(--text);color:white;border:none}
+  .btn-primary:hover{background:#333}
+  .btn-primary:disabled{background:var(--border-mid);cursor:not-allowed}
+  .btn-outline{background:white;color:var(--text);border:1px solid var(--border-mid)}
+  .btn-outline:hover{background:var(--bg)}
+  .timeout-banner{background:var(--coral-light);border:1px solid var(--coral-border);border-radius:var(--r-sm);padding:10px 14px;font-size:13px;color:#4A1B0C;margin-bottom:1.5rem;display:none;font-weight:500}
+  .score-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.75rem;margin-top:1.5rem;display:none}
+  .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:100;padding:1rem}
+  .modal{background:var(--surface);border-radius:var(--r-lg);padding:1.75rem;width:100%;max-width:420px;border:1px solid var(--border)}
+  .modal h2{font-size:17px;font-weight:600;color:var(--text);margin-bottom:6px}
+  .modal p{font-size:13px;color:var(--muted);margin-bottom:1.25rem;line-height:1.5}
+  .modal label{font-size:12px;font-weight:500;color:var(--hint);display:block;margin-bottom:4px}
+  .modal input{width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:var(--r-sm);font-size:13.5px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--surface);margin-bottom:12px}
+  .modal input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(26,77,143,.08)}
+  .modal-btns{display:flex;gap:10px;margin-top:4px}
+  .modal-err{font-size:12px;color:var(--coral);margin-top:-8px;margin-bottom:8px;display:none}
+  .send-status{font-size:13px;color:var(--muted);margin-top:10px;display:none;text-align:center}
+  .score-eyebrow{font-size:11px;font-weight:600;color:var(--hint);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+  .score-big{font-size:48px;font-weight:600;color:var(--text);font-family:'DM Mono',monospace}
+  .score-sub{font-size:13.5px;color:var(--muted);margin-top:5px;line-height:1.5}
+  .score-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:1.25rem}
+  .score-sec{background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 14px}
+  .score-sec-name{font-size:11px;color:var(--hint);font-weight:500;margin-bottom:4px}
+  .score-sec-val{font-size:20px;font-weight:600;color:var(--text);font-family:'DM Mono',monospace}
+  .score-note{margin-top:1.25rem;font-size:12.5px;color:var(--muted);line-height:1.6;padding-top:1rem;border-top:1px solid var(--border)}
+  .hidden{display:none!important}
+  @media(max-width:520px){.track-picker,.grid2,.grid3{grid-template-columns:1fr}.letterhead{flex-direction:column;gap:12px}.score-big{font-size:36px}}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="letterhead">
+  <div>
+    <div class="org">Boldr Impact</div>
+    <div class="doc-title">Accounting Associate Assessment</div>
+    <div class="doc-meta">Candidate evaluation · 4 sections · 15-minute limit · Fully auto-graded</div>
+  </div>
+  <div class="logo">
+    <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+  </div>
+</div>
+
+<div class="instr">
+  <strong>Instructions:</strong> Select your candidate track, then complete all questions within the 15-minute time limit. The timer starts when you choose a track. All questions are auto-graded — results appear immediately after submission.
+</div>
+
+<div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:10px">Select your track</div>
+<div class="track-picker">
+  <div class="track-card" id="track-fresh" onclick="setTrack('fresh')">
+    <div class="tc-icon">🎓</div>
+    <div class="tc-title">Fresh graduate</div>
+    <div class="tc-sub">Recently completed an accounting or finance degree with limited work experience</div>
+    <span class="tc-pill pill-f">Foundational focus</span>
+  </div>
+  <div class="track-card" id="track-exp" onclick="setTrack('exp')">
+    <div class="tc-icon">💼</div>
+    <div class="tc-title">Experienced candidate</div>
+    <div class="tc-sub">1+ years of professional accounting or bookkeeping experience</div>
+    <span class="tc-pill pill-e">Applied focus</span>
+  </div>
+</div>
+<div class="track-note" id="track-note"></div>
+
+<div id="body" class="hidden">
+
+  <div class="timer-wrap">
+    <div class="timer-bar" id="tbar">
+      <span class="t-icon">⏱</span>
+      <span class="t-lbl" id="tlbl">Time remaining</span>
+      <span class="t-clock" id="tclock">15:00</span>
+    </div>
+    <div class="t-prog"><div class="t-fill" id="tfill" style="width:100%"></div></div>
+  </div>
+
+  <div class="prog-row">
+    <span class="prog-lbl" id="plbl">0 of 16 answered</span>
+    <div class="prog-track"><div class="prog-fill" id="pfill"></div></div>
+  </div>
+
+  <div class="timeout-banner" id="tbanner">⏰ Time's up — your assessment has been automatically submitted.</div>
+
+  <!-- ── SECTION 1 ── -->
+  <div class="section">
+    <div class="sec-hdr">
+      <div class="sec-icon" style="background:var(--purple-light);color:var(--purple)">📒</div>
+      <div>
+        <div class="sec-title">Section 1 — Bookkeeping & journal entries</div>
+        <div class="sec-pts" id="s1pts"></div>
+      </div>
+    </div>
+
+    <!-- Q1 MC both -->
+    <div class="q" id="q1">
+      <div class="q-num">Q1 · 2 pts · Multiple choice <span class="q-tag" style="background:#F1EFE8;color:#5F5E5A">Both</span></div>
+      <div class="q-text">A company purchases office supplies for $500 cash. Which journal entry is correct?</div>
+      
+      <div class="options">
+        <label class="option"><input type="radio" name="q1" value="a"> <span>Debit Cash $500 / Credit Office Supplies $500</span></label>
+        <label class="option"><input type="radio" name="q1" value="b"> <span>Debit Office Supplies $500 / Credit Cash $500</span></label>
+        <label class="option"><input type="radio" name="q1" value="c"> <span>Debit Accounts Payable $500 / Credit Cash $500</span></label>
+        <label class="option"><input type="radio" name="q1" value="d"> <span>Debit Expenses $500 / Credit Accounts Payable $500</span></label>
+      </div>
+      <div class="feedback" id="fb1"></div>
+    </div>
+
+    <!-- Q2 MC both -->
+    <div class="q" id="q2">
+      <div class="q-num">Q2 · 2 pts · Multiple choice <span class="q-tag" style="background:#F1EFE8;color:#5F5E5A">Both</span></div>
+      <div class="q-text">Which of the following is the accounting equation?</div>
+      
+      <div class="options">
+        <label class="option"><input type="radio" name="q2" value="a"> <span>Assets = Liabilities − Equity</span></label>
+        <label class="option"><input type="radio" name="q2" value="b"> <span>Assets = Liabilities + Equity</span></label>
+        <label class="option"><input type="radio" name="q2" value="c"> <span>Revenue − Expenses = Net Income</span></label>
+        <label class="option"><input type="radio" name="q2" value="d"> <span>Assets − Revenue = Liabilities</span></label>
+      </div>
+      <div class="feedback" id="fb2"></div>
+    </div>
+
+    <!-- Q3 Fresh: MC on double-entry -->
+    <div class="q hidden" id="q3f-wrap">
+      <div class="q-num">Q3 · 2 pts · Multiple choice <span class="q-tag" style="background:var(--teal-light);color:var(--teal)">Fresh graduate</span></div>
+      <div class="q-text">Which statement best describes double-entry bookkeeping?</div>
+      <div class="options">
+        <label class="option"><input type="radio" name="q3f" value="a"> <span>Every transaction is recorded once in a single account</span></label>
+        <label class="option"><input type="radio" name="q3f" value="b"> <span>Every transaction affects at least two accounts — one debit and one credit of equal amount</span></label>
+        <label class="option"><input type="radio" name="q3f" value="c"> <span>Transactions are recorded only when cash changes hands</span></label>
+        <label class="option"><input type="radio" name="q3f" value="d"> <span>Debits and credits are recorded in separate ledgers that never interact</span></label>
+      </div>
+      <div class="feedback" id="fb3f"></div>
+    </div>
+
+    <!-- Q3 Exp: journal entry dropdowns + amounts -->
+    <div class="q hidden" id="q3e-wrap">
+      <div class="q-num">Q3 · 4 pts · Journal entry <span class="q-tag" style="background:var(--purple-light);color:var(--purple)">Experienced</span></div>
+      <div class="q-text">A client pays $2,400 in advance for 6 months of consulting. Select the correct accounts and enter the amounts for the initial receipt.</div>
+      <table class="journal-table">
+        <thead><tr><th style="width:50%">Account</th><th>Debit ($)</th><th>Credit ($)</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>
+              <select id="je1-acc">
+                <option value="">Select account…</option>
+                <option value="cash">Cash</option>
+                <option value="ar">Accounts Receivable</option>
+                <option value="unearned">Unearned Revenue</option>
+                <option value="revenue">Service Revenue</option>
+                <option value="ap">Accounts Payable</option>
+              </select>
+            </td>
+            <td><input type="text" id="je1-dr" placeholder="0.00" style="font-family:'DM Mono',monospace"></td>
+            <td><input type="text" id="je1-cr" placeholder="—"></td>
+          </tr>
+          <tr>
+            <td>
+              <select id="je2-acc">
+                <option value="">Select account…</option>
+                <option value="cash">Cash</option>
+                <option value="ar">Accounts Receivable</option>
+                <option value="unearned">Unearned Revenue</option>
+                <option value="revenue">Service Revenue</option>
+                <option value="ap">Accounts Payable</option>
+              </select>
+            </td>
+            <td><input type="text" id="je2-dr" placeholder="—"></td>
+            <td><input type="text" id="je2-cr" placeholder="0.00" style="font-family:'DM Mono',monospace"></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="feedback" id="fb3e"></div>
+    </div>
+
+    <!-- Q4 Fresh: MC accrual vs cash -->
+    <div class="q hidden" id="q4f-wrap">
+      <div class="q-num">Q4 · 2 pts · Multiple choice <span class="q-tag" style="background:var(--teal-light);color:var(--teal)">Fresh graduate</span></div>
+      <div class="q-text">A consultant completes work in December but receives payment in January. Under accrual accounting, when is the revenue recorded?</div>
+      <div class="options">
+        <label class="option"><input type="radio" name="q4f" value="a"> <span>January — when payment is received</span></label>
+        <label class="option"><input type="radio" name="q4f" value="b"> <span>December — when the work is completed</span></label>
+        <label class="option"><input type="radio" name="q4f" value="c"> <span>Split equally between December and January</span></label>
+        <label class="option"><input type="radio" name="q4f" value="d"> <span>Only when the client confirms the invoice</span></label>
+      </div>
+      <div class="feedback" id="fb4f"></div>
+    </div>
+
+    <!-- Q4 Exp: MC accrual timing scenario -->
+    <div class="q hidden" id="q4e-wrap">
+      <div class="q-num">Q4 · 2 pts · Multiple choice <span class="q-tag" style="background:var(--purple-light);color:var(--purple)">Experienced</span></div>
+      <div class="q-text">Your company pays $12,000 on January 1 for a 12-month insurance policy. Under accrual accounting, how much insurance expense is recorded in January?</div>
+      <div class="options">
+        <label class="option"><input type="radio" name="q4e" value="a"> <span>$12,000 — the full payment is expensed immediately</span></label>
+        <label class="option"><input type="radio" name="q4e" value="b"> <span>$0 — expenses are only recorded when cash is paid</span></label>
+        <label class="option"><input type="radio" name="q4e" value="c"> <span>$1,000 — one month's portion of the prepaid expense</span></label>
+        <label class="option"><input type="radio" name="q4e" value="d"> <span>$6,000 — half the policy recognized upfront</span></label>
+      </div>
+      <div class="feedback" id="fb4e"></div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 2 ── -->
+  <div class="section">
+    <div class="sec-hdr">
+      <div class="sec-icon" style="background:var(--teal-light);color:var(--teal)">📊</div>
+      <div>
+        <div class="sec-title">Section 2 — Financial statements</div>
+        <div class="sec-pts" id="s2pts"></div>
+      </div>
+    </div>
+
+    <!-- Q5 MC both -->
+    <div class="q" id="q5">
+      <div class="q-num">Q5 · 2 pts · Multiple choice <span class="q-tag" style="background:#F1EFE8;color:#5F5E5A">Both</span></div>
+      <div class="q-text">Which financial statement shows a company's financial position at a specific point in time?</div>
+      
+      <div class="options">
+        <label class="option"><input type="radio" name="q5" value="a"> <span>Income statement</span></label>
+        <label class="option"><input type="radio" name="q5" value="b"> <span>Statement of cash flows</span></label>
+        <label class="option"><input type="radio" name="q5" value="c"> <span>Balance sheet</span></label>
+        <label class="option"><input type="radio" name="q5" value="d"> <span>Statement of retained earnings</span></label>
+      </div>
+      <div class="feedback" id="fb5"></div>
+    </div>
+
+    <!-- Q6 numeric both -->
+    <div class="q">
+      <div class="q-num">Q6 · 2 pts · Calculation <span class="q-tag" style="background:#F1EFE8;color:#5F5E5A">Both</span></div>
+      <div class="q-text">Total assets = $850,000 · Total liabilities = $320,000. What is total equity?</div>
+      
+      <div style="margin-top:8px"><label class="field-lbl">Total equity ($)</label><input type="text" id="q6-ans" class="input-sm" placeholder="Your answer" style="max-width:200px;font-family:'DM Mono',monospace"></div>
+      <div class="feedback" id="fb6"></div>
+    </div>
+
+    <!-- Q7 MC both -->
+    <div class="q" id="q7">
+      <div class="q-num">Q7 · 2 pts · Multiple choice <span class="q-tag" style="background:#F1EFE8;color:#5F5E5A">Both</span></div>
+      <div class="q-text">Depreciation expense is classified under which section of the cash flow statement (indirect method)?</div>
+      
+      <div class="options">
+        <label class="option"><input type="radio" name="q7" value="a"> <span>Investing activities</span></label>
+        <label class="option"><input type="radio" name="q7" value="b"> <span>Financing activities</span></label>
+        <label class="option"><input type="radio" name="q7" value="c"> <span>Operating activities — added back to net income</span></label>
+        <label class="option"><input type="radio" name="q7" value="d"> <span>It does not appear on the cash flow statement</span></label>
+      </div>
+      <div class="feedback" id="fb7"></div>
+    </div>
+
+    <!-- Q8 numeric both -->
+    <div class="q">
+      <div class="q-num">Q8 · 4 pts · Calculation <span class="q-tag" style="background:#F1EFE8;color:#5F5E5A">Both</span></div>
+      <div class="q-text">Revenue $180,000 · COGS $95,000 · Operating expenses $42,000 · Tax rate 25%.<br>Calculate gross profit and net income.</div>
+      
+      <div class="grid2">
+        <div><label class="field-lbl">Gross profit ($)</label><input type="text" id="q8-gp" class="input-sm" placeholder="Your answer" style="font-family:'DM Mono',monospace"></div>
+        <div><label class="field-lbl">Net income ($)</label><input type="text" id="q8-ni" class="input-sm" placeholder="Your answer" style="font-family:'DM Mono',monospace"></div>
+      </div>
+      <div class="feedback" id="fb8"></div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 3 ── -->
+  <div class="section">
+    <div class="sec-hdr">
+      <div class="sec-icon" style="background:var(--amber-light);color:var(--amber)">🔄</div>
+      <div>
+        <div class="sec-title">Section 3 — Accounts payable & receivable</div>
+        <div class="sec-pts" id="s3pts"></div>
+      </div>
+    </div>
+
+    <!-- Q9 MC both -->
+    <div class="q" id="q9">
+      <div class="q-num">Q9 · 2 pts · Multiple choice <span class="q-tag" style="background:#F1EFE8;color:#5F5E5A">Both</span></div>
+      <div class="q-text">An invoice shows terms "2/10, net 30." What does this mean?</div>
+      
+      <div class="options">
+        <label class="option"><input type="radio" name="q9" value="a"> <span>Pay within 2 days for a 10% discount; full amount due in 30 days</span></label>
+        <label class="option"><input type="radio" name="q9" value="b"> <span>2% discount if paid within 10 days; full amount due in 30 days</span></label>
+        <label class="option"><input type="radio" name="q9" value="c"> <span>Pay 2/10 of the invoice now and the rest in 30 days</span></label>
+        <label class="option"><input type="radio" name="q9" value="d"> <span>Late fee of 2% applies after 10 days; final due date is 30 days</span></label>
+      </div>
+      <div class="feedback" id="fb9"></div>
+    </div>
+
+    <!-- Q10 MC both -->
+    <div class="q" id="q10">
+      <div class="q-num">Q10 · 2 pts · Multiple choice <span class="q-tag" style="background:#F1EFE8;color:#5F5E5A">Both</span></div>
+      <div class="q-text">Which of the following correctly describes accounts receivable?</div>
+      
+      <div class="options">
+        <label class="option"><input type="radio" name="q10" value="a"> <span>Money the company owes to its suppliers</span></label>
+        <label class="option"><input type="radio" name="q10" value="b"> <span>Revenue earned but not yet recognized</span></label>
+        <label class="option"><input type="radio" name="q10" value="c"> <span>Money owed to the company by its customers</span></label>
+        <label class="option"><input type="radio" name="q10" value="d"> <span>Cash received in advance for future services</span></label>
+      </div>
+      <div class="feedback" id="fb10"></div>
+    </div>
+
+    <!-- Q11 MC Fresh: AP flag timing -->
+    <div class="q hidden" id="q11f-wrap">
+      <div class="q-num">Q11 · 2 pts · Multiple choice <span class="q-tag" style="background:var(--teal-light);color:var(--teal)">Fresh graduate</span></div>
+      <div class="q-text">A vendor invoice of $3,200 was received May 1 (net 30 terms). It is now May 20. What is the appropriate action?</div>
+      <div class="options">
+        <label class="option"><input type="radio" name="q11f" value="a"> <span>No action needed — the invoice is not yet due</span></label>
+        <label class="option"><input type="radio" name="q11f" value="b"> <span>Flag the invoice for payment now to ensure it is processed before the May 31 due date</span></label>
+        <label class="option"><input type="radio" name="q11f" value="c"> <span>The invoice is already overdue — escalate immediately</span></label>
+        <label class="option"><input type="radio" name="q11f" value="d"> <span>Request a new invoice with extended terms</span></label>
+      </div>
+      <div class="feedback" id="fb11f"></div>
+    </div>
+
+    <!-- Q11 Exp: MC AP workflow -->
+    <div class="q hidden" id="q11e-wrap">
+      <div class="q-num">Q11 · 2 pts · Multiple choice <span class="q-tag" style="background:var(--purple-light);color:var(--purple)">Experienced</span></div>
+      <div class="q-text">A vendor invoice of $3,200 (net 30, received May 1) is in the approval queue on May 20. Which action best reflects standard AP controls?</div>
+      <div class="options">
+        <label class="option"><input type="radio" name="q11e" value="a"> <span>Pay immediately without approval to avoid lateness</span></label>
+        <label class="option"><input type="radio" name="q11e" value="b"> <span>Wait until May 31 — there's no urgency yet</span></label>
+        <label class="option"><input type="radio" name="q11e" value="c"> <span>Escalate to the approver now; process payment once approved, before May 31</span></label>
+        <label class="option"><input type="radio" name="q11e" value="d"> <span>Return the invoice to the vendor and request net 60 terms</span></label>
+      </div>
+      <div class="feedback" id="fb11e"></div>
+    </div>
+
+    <!-- Q12 Fresh: MC bank rec concept -->
+    <div class="q hidden" id="q12f-wrap">
+      <div class="q-num">Q12 · 2 pts · Multiple choice <span class="q-tag" style="background:var(--teal-light);color:var(--teal)">Fresh graduate</span></div>
+      <div class="q-text">What is the primary purpose of a bank reconciliation?</div>
+      <div class="options">
+        <label class="option"><input type="radio" name="q12f" value="a"> <span>To calculate the company's net profit for the month</span></label>
+        <label class="option"><input type="radio" name="q12f" value="b"> <span>To ensure the company's cash ledger balance matches the bank statement balance, and to identify reconciling differences</span></label>
+        <label class="option"><input type="radio" name="q12f" value="c"> <span>To prepare the monthly income statement</span></label>
+        <label class="option"><input type="radio" name="q12f" value="d"> <span>To verify that all supplier invoices have been paid</span></label>
+      </div>
+      <div class="feedback" id="fb12f"></div>
+    </div>
+
+    <!-- Q12 Exp: checkbox multi-select bank rec steps -->
+    <div class="q hidden" id="q12e-wrap">
+      <div class="q-num">Q12 · 3 pts · Multi-select <span class="q-tag" style="background:var(--purple-light);color:var(--purple)">Experienced</span></div>
+      <div class="q-text">Which of the following are standard reconciling items when completing a month-end bank reconciliation? Select all that apply.</div>
+      <div class="checkboxes">
+        <label class="chk-opt"><input type="checkbox" name="q12e" value="a"> <span>Outstanding checks issued but not yet cleared the bank</span></label>
+        <label class="chk-opt"><input type="checkbox" name="q12e" value="b"> <span>Deposits in transit recorded in the books but not yet on the bank statement</span></label>
+        <label class="chk-opt"><input type="checkbox" name="q12e" value="c"> <span>Bank service charges not yet recorded in the company's books</span></label>
+        <label class="chk-opt"><input type="checkbox" name="q12e" value="d"> <span>The company's net income for the month</span></label>
+        <label class="chk-opt"><input type="checkbox" name="q12e" value="e"> <span>Accounts receivable aging schedule</span></label>
+      </div>
+      <div class="feedback" id="fb12e"></div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 4 ── -->
+  <div class="section">
+    <div class="sec-hdr">
+      <div class="sec-icon" style="background:var(--coral-light);color:var(--coral)">📋</div>
+      <div>
+        <div class="sec-title">Section 4 — Excel & software skills</div>
+        <div class="sec-pts" id="s4pts"></div>
+      </div>
+    </div>
+
+    <!-- Q13 MC both -->
+    <div class="q" id="q13">
+      <div class="q-num">Q13 · 2 pts · Multiple choice <span class="q-tag" style="background:#F1EFE8;color:#5F5E5A">Both</span></div>
+      <div class="q-text">Which Excel formula would you use to look up a customer's balance from a separate table using their account ID?</div>
+      
+      <div class="options">
+        <label class="option"><input type="radio" name="q13" value="a"> <span>SUMIF</span></label>
+        <label class="option"><input type="radio" name="q13" value="b"> <span>VLOOKUP or XLOOKUP</span></label>
+        <label class="option"><input type="radio" name="q13" value="c"> <span>INDEX/MATCH</span></label>
+        <label class="option"><input type="radio" name="q13" value="d"> <span>B or C (both are correct lookup approaches)</span></label>
+      </div>
+      <div class="feedback" id="fb13"></div>
+    </div>
+
+    <!-- Q14 MC both -->
+    <div class="q" id="q14">
+      <div class="q-num">Q14 · 2 pts · Multiple choice <span class="q-tag" style="background:#F1EFE8;color:#5F5E5A">Both</span></div>
+      <div class="q-text">You have 500 transactions and want to summarize total spend by department. The best Excel tool is:</div>
+      
+      <div class="options">
+        <label class="option"><input type="radio" name="q14" value="a"> <span>Conditional formatting</span></label>
+        <label class="option"><input type="radio" name="q14" value="b"> <span>A pivot table</span></label>
+        <label class="option"><input type="radio" name="q14" value="c"> <span>COUNTIF formula</span></label>
+        <label class="option"><input type="radio" name="q14" value="d"> <span>Data validation</span></label>
+      </div>
+      <div class="feedback" id="fb14"></div>
+    </div>
+
+    <!-- Q15 formula fill-in both -->
+    <div class="q">
+      <div class="q-num">Q15 · 2 pts · Formula <span class="q-tag" style="background:#F1EFE8;color:#5F5E5A">Both</span></div>
+      <div class="q-text">Write the Excel formula to sum all values in column B where column A equals "Marketing" (rows 2–100).</div>
+      
+      <input type="text" id="q15-ans" class="input-sm" placeholder="=…" style="font-family:'DM Mono',monospace;margin-top:8px">
+      <div class="feedback" id="fb15"></div>
+    </div>
+
+    <!-- Q16 Fresh: MC software knowledge -->
+    <div class="q hidden" id="q16f-wrap">
+      <div class="q-num">Q16 · 2 pts · Multiple choice <span class="q-tag" style="background:var(--teal-light);color:var(--teal)">Fresh graduate</span></div>
+      <div class="q-text">Which of the following best describes the primary function of accounting software like Xero or QuickBooks?</div>
+      <div class="options">
+        <label class="option"><input type="radio" name="q16f" value="a"> <span>To replace the need for any accounting knowledge</span></label>
+        <label class="option"><input type="radio" name="q16f" value="b"> <span>To automate and organize financial transactions, generate reports, and support bookkeeping and compliance</span></label>
+        <label class="option"><input type="radio" name="q16f" value="c"> <span>To only process payroll and nothing else</span></label>
+        <label class="option"><input type="radio" name="q16f" value="d"> <span>To manage email communications with clients</span></label>
+      </div>
+      <div class="feedback" id="fb16f"></div>
+    </div>
+
+    <!-- Q16 Exp: MC Xero/QuickBooks specific -->
+    <div class="q hidden" id="q16e-wrap">
+      <div class="q-num">Q16 · 2 pts · Multiple choice <span class="q-tag" style="background:var(--purple-light);color:var(--purple)">Experienced</span></div>
+      <div class="q-text">In Xero or QuickBooks, when you "reconcile" a bank account, what are you doing?</div>
+      <div class="options">
+        <label class="option"><input type="radio" name="q16e" value="a"> <span>Exporting transactions to a spreadsheet for manual review</span></label>
+        <label class="option"><input type="radio" name="q16e" value="b"> <span>Matching imported bank transactions to existing records in the system to confirm accuracy</span></label>
+        <label class="option"><input type="radio" name="q16e" value="c"> <span>Sending payment reminders to customers with overdue invoices</span></label>
+        <label class="option"><input type="radio" name="q16e" value="d"> <span>Closing the financial period and locking prior transactions</span></label>
+      </div>
+      <div class="feedback" id="fb16e"></div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-primary" id="sub-btn" onclick="submitAssessment(false)">Submit assessment</button>
+    <button class="btn btn-outline" onclick="clearAll()">Clear answers</button>
+  </div>
+
+  <div class="score-card" id="score-card">
+    <div class="score-eyebrow">Results</div>
+    <div class="score-big" id="sc-display">—</div>
+    <div class="score-sub" id="sc-label"></div>
+    <div class="score-grid" id="sc-grid"></div>
+    <div class="score-note" id="sc-note"></div>
+  </div>
+
+</div>
+</div>
+
+<script>
+let track=null,done=false,tiv=null,sLeft=900;
+
+const MC={q1:'b',q2:'b',q5:'c',q7:'c',q9:'b',q10:'c',q13:'d',q14:'b',
+  q3f:'b',q4f:'b',q4e:'c',q11f:'b',q11e:'c',q12f:'b',q16f:'b',q16e:'b'};
+
+const mcOk={
+  q1:'Correct. Debit Office Supplies (asset gained), credit Cash (asset given up).',
+  q2:'Correct. Assets = Liabilities + Equity — the fundamental accounting equation.',
+  q3f:'Correct. Double-entry means every transaction affects at least two accounts with equal debits and credits, keeping the equation balanced.',
+  q4f:'Correct. Under accrual, revenue is recorded in December — when the work is earned, not when cash is received.',
+  q4e:'Correct. $12,000 ÷ 12 = $1,000 per month. Only January\'s portion is expensed; the rest remains as prepaid insurance (asset).',
+  q5:'Correct. The balance sheet (statement of financial position) is a snapshot at a specific date.',
+  q7:'Correct. Depreciation is non-cash and is added back to net income in the operating activities section.',
+  q9:'Correct. 2% discount if paid within 10 days; otherwise full amount due in 30 days.',
+  q10:'Correct. Accounts receivable is an asset — money customers owe the company.',
+  q11f:'Correct. Payment is due May 31. Flagging it now gives enough time for processing.',
+  q11e:'Correct. With 10 days remaining, escalate to the approver and process once approved — standard AP controls.',
+  q12f:'Correct. Bank reconciliation ensures the company\'s cash ledger matches the bank statement and identifies differences.',
+  q13:'Correct. VLOOKUP, XLOOKUP, and INDEX/MATCH are all valid lookup functions.',
+  q14:'Correct. Pivot tables are the most efficient way to summarize large datasets by category.',
+  q16f:'Correct. Accounting software automates bookkeeping, organizes transactions, and generates financial reports.',
+  q16e:'Correct. Bank reconciliation in software matches imported bank transactions to existing records to confirm accuracy.',
+};
+const mcNo={
+  q1:'Incorrect. Debit the asset received (Office Supplies) and credit the asset given up (Cash).',
+  q2:'Incorrect. The correct equation is Assets = Liabilities + Equity.',
+  q3f:'Incorrect. Double-entry means every transaction affects at least two accounts — equal debits and credits — keeping the accounting equation in balance.',
+  q4f:'Incorrect. Under accrual accounting, revenue is recorded in December when the work is completed — not when payment arrives.',
+  q4e:'Incorrect. The correct answer is $1,000 — one month\'s share of the $12,000 policy ($12,000 ÷ 12). The remainder is a prepaid asset.',
+  q5:'Incorrect. The balance sheet shows financial position at a single point in time. The income statement covers a period.',
+  q7:'Incorrect. Depreciation is a non-cash expense added back to net income in operating activities under the indirect method.',
+  q9:'Incorrect. "2/10, net 30" = 2% discount if paid in 10 days; full balance due by day 30.',
+  q10:'Incorrect. AR is an asset — money customers owe the company.',
+  q11f:'Incorrect. Payment is due May 31 (30 days from May 1). The correct action is to flag it now for timely processing.',
+  q11e:'Incorrect. Standard AP practice is to escalate to the approver and process payment once approved before the due date.',
+  q12f:'Incorrect. Bank reconciliation matches the company\'s cash ledger to the bank statement to identify differences, not to calculate profit.',
+  q13:'Incorrect. Both VLOOKUP/XLOOKUP and INDEX/MATCH are valid lookup approaches — the correct answer is D.',
+  q14:'Incorrect. Pivot tables are best suited for grouping and summarizing large transaction datasets.',
+  q16f:'Incorrect. Accounting software automates bookkeeping, organizes transactions, and generates financial reports — it doesn\'t replace accounting knowledge.',
+  q16e:'Incorrect. In Xero/QuickBooks, reconciling means matching imported bank transactions to existing records to confirm accuracy.',
+};
+
+function fmt(s){const m=Math.floor(s/60),sc=s%60;return m+':'+(sc<10?'0':'')+sc;}
+function startTimer(){
+  clearInterval(tiv);sLeft=900;tick();
+  tiv=setInterval(()=>{sLeft--;tick();if(sLeft<=0){clearInterval(tiv);submitAssessment(true);}},1000);
+}
+function tick(){
+  document.getElementById('tclock').textContent=fmt(sLeft);
+  document.getElementById('tfill').style.width=(sLeft/900*100)+'%';
+  const b=document.getElementById('tbar'),l=document.getElementById('tlbl');
+  b.className='timer-bar';
+  if(sLeft<=60){b.classList.add('danger');l.textContent='Less than 1 minute left!';}
+  else if(sLeft<=180){b.classList.add('warn');l.textContent='3 minutes remaining';}
+  else l.textContent='Time remaining';
+}
+
+function setTrack(t){
+  track=t;done=false;
+  document.querySelectorAll('input,select').forEach(el=>{el.disabled=false;if(el.type==='radio'||el.type==='checkbox')el.checked=false;else el.value='';});
+  document.querySelectorAll('.feedback').forEach(el=>{el.className='feedback';el.textContent='';});
+  document.querySelectorAll('.option,.chk-opt').forEach(el=>el.className=el.classList.contains('chk-opt')?'chk-opt':'option');
+  document.getElementById('score-card').style.display='none';
+  document.getElementById('tbanner').style.display='none';
+  document.getElementById('body').classList.remove('hidden');
+  document.getElementById('sub-btn').disabled=false;
+  document.getElementById('track-fresh').classList.toggle('active',t==='fresh');
+  document.getElementById('track-exp').classList.toggle('active',t==='exp');
+  const iF=t==='fresh';
+  const tn=document.getElementById('track-note');
+  tn.style.display='block';
+  tn.textContent=iF?'Fresh graduate track: contextual hints provided; questions test conceptual knowledge from your studies.':'Experienced track: no hints; questions test applied professional knowledge.';
+  
+  ['q3f-wrap','q4f-wrap','q11f-wrap','q12f-wrap','q16f-wrap'].forEach(id=>document.getElementById(id).classList.toggle('hidden',!iF));
+  ['q3e-wrap','q4e-wrap','q11e-wrap','q12e-wrap','q16e-wrap'].forEach(id=>document.getElementById(id).classList.toggle('hidden',iF));
+  const pts=iF?{s1:'8 pts',s2:'10 pts',s3:'8 pts',s4:'8 pts'}:{s1:'10 pts',s2:'10 pts',s3:'9 pts',s4:'8 pts'};
+  ['s1','s2','s3','s4'].forEach(s=>document.getElementById(s+'pts').textContent=pts[s]);
+  updateProg();startTimer();
+  document.getElementById('body').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function countAnswered(){
+  const mcQs=['q1','q2','q5','q7','q9','q10','q13','q14'];
+  let n=0;
+  mcQs.forEach(q=>{if(document.querySelector(`input[name="${q}"]:checked`))n++;});
+  if(track==='fresh'){
+    ['q3f','q4f','q11f','q12f','q16f'].forEach(q=>{if(document.querySelector(`input[name="${q}"]:checked`))n++;});
+    if((document.getElementById('q6-ans')||{}).value?.trim())n++;
+    if((document.getElementById('q8-gp')||{}).value?.trim())n++;
+    if((document.getElementById('q8-ni')||{}).value?.trim())n++;
+    if((document.getElementById('q15-ans')||{}).value?.trim())n++;
+  } else {
+    ['q4e','q11e','q16e'].forEach(q=>{if(document.querySelector(`input[name="${q}"]:checked`))n++;});
+    if(document.querySelectorAll('input[name="q12e"]:checked').length)n++;
+    if((document.getElementById('je1-acc')||{}).value)n++;
+    if((document.getElementById('q6-ans')||{}).value?.trim())n++;
+    if((document.getElementById('q8-gp')||{}).value?.trim())n++;
+    if((document.getElementById('q8-ni')||{}).value?.trim())n++;
+    if((document.getElementById('q15-ans')||{}).value?.trim())n++;
+  }
+  return Math.min(n,16);
+}
+function updateProg(){
+  const n=countAnswered(),total=16;
+  document.getElementById('pfill').style.width=Math.round(n/total*100)+'%';
+  document.getElementById('plbl').textContent=n+' of '+total+' answered';
+}
+document.querySelectorAll('input,select').forEach(el=>{el.addEventListener('change',updateProg);el.addEventListener('input',updateProg);});
+
+function num(v,exp,tol){const n=parseFloat((v||'').replace(/[$,\s]/g,''));return !isNaN(n)&&Math.abs(n-exp)<=tol;}
+function gradeQ(q){const s=document.querySelector(`input[name="${q}"]:checked`);return s&&s.value===MC[q]?2:0;}
+
+function showMC(q,pts){
+  const sel=document.querySelector(`input[name="${q}"]:checked`);
+  const labels=document.querySelectorAll(`input[name="${q}"]`);
+  const cv=MC[q];let ci=-1;
+  labels.forEach((o,i)=>{if(o.value===cv)ci=i;});
+  const fb=document.getElementById('fb'+q);
+  const isOk=sel&&sel.value===cv;
+  if(sel){
+    sel.closest('label').className=(sel.closest('label').classList.contains('chk-opt')?'chk-opt':'option')+' '+(isOk?'sel-ok':'sel-no');
+  }
+  if(!isOk&&ci>=0){const lbl=labels[ci].closest('label');lbl.className=(lbl.classList.contains('chk-opt')?'chk-opt':'option')+' show-ok';}
+  if(fb){
+    fb.textContent=(isOk?'✓ ':'✗ ')+(isOk?mcOk[q]:mcNo[q]);
+    fb.className='feedback '+(isOk?'fb-ok':'fb-no');
+  }
+  return isOk?pts:0;
+}
+
+function submitAssessment(timedOut){
+  if(done)return;done=true;clearInterval(tiv);
+  document.querySelectorAll('input,select').forEach(el=>el.disabled=true);
+  document.getElementById('sub-btn').disabled=true;
+  if(timedOut){document.getElementById('tbanner').style.display='block';const b=document.getElementById('tbar');b.className='timer-bar danger';document.getElementById('tclock').textContent='0:00';document.getElementById('tlbl').textContent='Time expired';}
+
+  const iF=track==='fresh';
+  let total=0,s1=0,s2=0,s3=0,s4=0;
+  const maxTotal=iF?34:37;
+
+  // Section 1
+  s1+=showMC('q1',2);
+  s1+=showMC('q2',2);
+  if(iF){
+    s1+=showMC('q3f',2);
+    s1+=showMC('q4f',2);
+  } else {
+    // Journal entry grading
+    const a1=(document.getElementById('je1-acc').value||'').toLowerCase();
+    const a2=(document.getElementById('je2-acc').value||'').toLowerCase();
+    const dr1=num(document.getElementById('je1-dr').value,2400,1);
+    const cr2=num(document.getElementById('je2-cr').value,2400,1);
+    const accsOk=(a1==='cash'&&a2==='unearned')||(a1==='unearned'&&a2==='cash');
+    const amtsOk=dr1&&cr2;
+    const jeScore=(accsOk?2:0)+(amtsOk?2:0);
+    s1+=jeScore;
+    const fb3e=document.getElementById('fb3e');
+    fb3e.textContent=jeScore===4?'✓ Correct. Debit Cash $2,400 / Credit Unearned Revenue $2,400.':jeScore===2?'Partial credit. '+(accsOk?'Correct accounts, but check amounts ($2,400 each).':'Correct amounts, but accounts should be Cash (debit) and Unearned Revenue (credit).'):'✗ Correct entry: Debit Cash $2,400 / Credit Unearned Revenue $2,400. The liability is recognized until services are delivered.';
+    fb3e.className='feedback '+(jeScore===4?'fb-ok':jeScore===2?'fb-part':'fb-no');
+    s1+=showMC('q4e',2);
+  }
+
+  // Section 2
+  s2+=showMC('q5',2);
+  const gpOk=num(document.getElementById('q8-gp').value,85000,500);
+  const niOk=num(document.getElementById('q8-ni').value,32250,500);
+  const q8s=(gpOk?2:0)+(niOk?2:0);s2+=q8s;
+  const fb8=document.getElementById('fb8');
+  fb8.textContent=q8s===4?'✓ Correct. Gross profit $85,000 (180k−95k). Net income $32,250 ((85k−42k)×0.75).':q8s>0?'Partial. Gross profit = $85,000 · Net income = $32,250.':'✗ Gross profit = $85,000 (Rev−COGS). Pre-tax income = $43,000. Net income = $43,000 × 0.75 = $32,250.';
+  fb8.className='feedback '+(q8s===4?'fb-ok':q8s>0?'fb-part':'fb-no');
+  const q6v=document.getElementById('q6-ans').value;
+  const q6ok=num(q6v,530000,500);s2+=q6ok?2:0;
+  const fb6=document.getElementById('fb6');
+  fb6.textContent=q6ok?'✓ Correct. $850,000 − $320,000 = $530,000.':'✗ Equity = Assets − Liabilities = $850,000 − $320,000 = $530,000.';
+  fb6.className='feedback '+(q6ok?'fb-ok':'fb-no');
+  s2+=showMC('q7',2);
+
+  // Section 3
+  s3+=showMC('q9',2);
+  s3+=showMC('q10',2);
+  if(iF){
+    s3+=showMC('q11f',2);
+    s3+=showMC('q12f',2);
+  } else {
+    s3+=showMC('q11e',2);
+    // Multi-select bank rec
+    const correct=['a','b','c'];
+    const chosen=Array.from(document.querySelectorAll('input[name="q12e"]:checked')).map(el=>el.value);
+    const labels=document.querySelectorAll('input[name="q12e"]');
+    labels.forEach(el=>{
+      const lbl=el.closest('label');
+      const isCorrect=correct.includes(el.value);
+      const isChosen=chosen.includes(el.value);
+      if(isChosen&&isCorrect)lbl.className='chk-opt chk-ok';
+      else if(isChosen&&!isCorrect)lbl.className='chk-opt chk-no';
+      else if(!isChosen&&isCorrect)lbl.className='chk-opt chk-miss';
+    });
+    const hits=chosen.filter(v=>correct.includes(v)).length;
+    const wrongs=chosen.filter(v=>!correct.includes(v)).length;
+    const q12eScore=Math.max(0,hits-wrongs)===3?3:hits===2&&wrongs===0?2:hits>=1&&wrongs===0?1:0;
+    s3+=q12eScore;
+    const fb12e=document.getElementById('fb12e');
+    fb12e.textContent=q12eScore===3?'✓ Correct. Outstanding checks, deposits in transit, and bank charges are all standard reconciling items.':q12eScore>0?'Partial credit. Correct items: outstanding checks (A), deposits in transit (B), bank charges (C). Net income and AR aging are not reconciling items.':'✗ The correct items are: A (outstanding checks), B (deposits in transit), and C (bank service charges). Highlighted in blue above.';
+    fb12e.className='feedback '+(q12eScore===3?'fb-ok':q12eScore>0?'fb-part':'fb-no');
+  }
+
+  // Section 4
+  s4+=showMC('q13',2);
+  s4+=showMC('q14',2);
+  const q15v=(document.getElementById('q15-ans').value||'').trim().toUpperCase().replace(/\s/g,'');
+  const q15ok=q15v.includes('SUMIF')&&q15v.includes('MARKETING')&&q15v.includes('B');
+  const q15part=q15v.includes('SUMIF')||(q15v.includes('MARKETING')&&q15v.includes('B'));
+  s4+=q15ok?2:q15part?1:0;
+  const fb15=document.getElementById('fb15');
+  fb15.textContent=q15ok?'✓ Correct. =SUMIF(A2:A100,"Marketing",B2:B100)':q15part?'Partial credit — close! Full answer: =SUMIF(A2:A100,"Marketing",B2:B100)':'✗ Correct: =SUMIF(A2:A100,"Marketing",B2:B100)';
+  fb15.className='feedback '+(q15ok?'fb-ok':q15part?'fb-part':'fb-no');
+  if(iF)s4+=showMC('q16f',2);
+  else s4+=showMC('q16e',2);
+
+  total=s1+s2+s3+s4;
+  const pct=Math.round(total/maxTotal*100);
+  const rating=pct>=85?'Strong candidate':pct>=70?'Good candidate — minor gaps':pct>=50?'Moderate — further consideration':' Below threshold';
+  const minsUsed=timedOut?15:Math.ceil((900-sLeft)/60);
+  document.getElementById('sc-display').textContent=total+'/'+maxTotal;
+  document.getElementById('sc-label').textContent=rating+' ('+pct+'%) · '+(iF?'Fresh graduate':'Experienced')+' track · '+minsUsed+' min used';
+  const sMax=iF?{s1:8,s2:10,s3:8,s4:8}:{s1:10,s2:10,s3:9,s4:8};
+  document.getElementById('sc-grid').innerHTML=[{n:'Bookkeeping',v:s1,m:sMax.s1},{n:'Fin. statements',v:s2,m:sMax.s2},{n:'AP/AR',v:s3,m:sMax.s3},{n:'Excel',v:s4,m:sMax.s4}].map(x=>`<div class="score-sec"><div class="score-sec-name">${x.n}</div><div class="score-sec-val">${x.v}/${x.m}</div></div>`).join('');
+  document.getElementById('sc-note').textContent='All '+maxTotal+' points are auto-graded. Feedback is shown below each question. Use this score alongside the candidate interview to make your hiring decision.';
+  showModal({track:iF?'Fresh graduate':'Experienced',score:total,maxTotal,pct,rating,minsUsed,s1,s2,s3,s4,sMax});
+}
+
+function clearAll(){
+  if(done)return;
+  document.querySelectorAll('input[type=radio],input[type=checkbox]').forEach(el=>el.checked=false);
+  document.querySelectorAll('input[type=text],select').forEach(el=>el.value='');
+  document.querySelectorAll('.feedback').forEach(el=>{el.className='feedback';el.textContent='';});
+  document.querySelectorAll('.option').forEach(el=>el.className='option');
+  document.querySelectorAll('.chk-opt').forEach(el=>el.className='chk-opt');
+  document.getElementById('pfill').style.width='0%';
+  document.getElementById('plbl').textContent='0 of 16 answered';
+}
+</script>
+
+<!-- Candidate info modal -->
+<div class="modal-backdrop hidden" id="modal">
+  <div class="modal">
+    <h2>Almost done — one last step</h2>
+    <p>Enter your details so your results can be sent to the hiring team.</p>
+    <label>Full name</label>
+    <input type="text" id="cand-name" placeholder="e.g. Maria Santos">
+    <label>Email address</label>
+    <input type="text" id="cand-email" placeholder="e.g. maria@email.com">
+    <div class="modal-err" id="modal-err">Please fill in both fields with a valid email.</div>
+    <div class="modal-btns">
+      <button class="btn btn-primary" id="send-btn" onclick="sendResults()">Send my results</button>
+    </div>
+    <div class="send-status" id="send-status"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+const EMAILJS_PUBLIC_KEY  = 'bQ8M1TPwq8Vqn3P2P';
+const EMAILJS_SERVICE_ID  = 'service_pl0vboa';
+const EMAILJS_TEMPLATE_ID = 'template_xky1yrd';
+
+(function(){ emailjs.init(EMAILJS_PUBLIC_KEY); })();
+
+let pendingResults = null;
+
+function showModal(results) {
+  pendingResults = results;
+  document.getElementById('modal').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('cand-name').focus(), 100);
+}
+
+function sendResults() {
+  const name  = document.getElementById('cand-name').value.trim();
+  const email = document.getElementById('cand-email').value.trim();
+  const errEl = document.getElementById('modal-err');
+  const statusEl = document.getElementById('send-status');
+  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!name || !emailRe.test(email)) { errEl.style.display='block'; return; }
+  errEl.style.display = 'none';
+  document.getElementById('send-btn').disabled = true;
+  statusEl.style.display = 'block';
+  statusEl.style.color = 'var(--muted)';
+  statusEl.textContent = 'Sending results…';
+  const p = pendingResults;
+  emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+    to_email:        'csgavila05@gmail.com',
+    candidate_name:  name,
+    candidate_email: email,
+    track:           p.track,
+    score:           p.score + '/' + p.maxTotal,
+    percent:         p.pct + '%',
+    rating:          p.rating,
+    time_used:       p.minsUsed + ' minutes',
+    bookkeeping:     p.s1 + '/' + p.sMax.s1,
+    fin_statements:  p.s2 + '/' + p.sMax.s2,
+    ap_ar:           p.s3 + '/' + p.sMax.s3,
+    excel:           p.s4 + '/' + p.sMax.s4,
+    submitted_at:    new Date().toLocaleString(),
+  }).then(() => {
+    statusEl.textContent = 'Results sent successfully!';
+    statusEl.style.color = 'var(--teal)';
+    setTimeout(() => {
+      document.getElementById('modal').classList.add('hidden');
+      document.getElementById('score-card').style.display = 'block';
+      document.getElementById('score-card').scrollIntoView({behavior:'smooth',block:'nearest'});
+    }, 1500);
+  }).catch(() => {
+    statusEl.textContent = 'Could not send automatically. Please screenshot your results and email them to the hiring team.';
+    statusEl.style.color = 'var(--coral)';
+    document.getElementById('send-btn').disabled = false;
+    setTimeout(() => {
+      document.getElementById('modal').classList.add('hidden');
+      document.getElementById('score-card').style.display = 'block';
+      document.getElementById('score-card').scrollIntoView({behavior:'smooth',block:'nearest'});
+    }, 3500);
+  });
+}
+</script>
+
+</body>
+</html>
